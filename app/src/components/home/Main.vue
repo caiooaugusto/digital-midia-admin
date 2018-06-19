@@ -23,14 +23,12 @@
     import Toolbar from './Toolbar.vue'
     import HomeFooter from './Footer.vue'
     import Panel from '../panel/Panel.vue'
-    import Incident from '../incident/Incident.vue'
     
     export default {
         components: {
             Toolbar,
             HomeFooter,
-            Panel, 
-            Incident
+            Panel
         },
         data () {
             return {
