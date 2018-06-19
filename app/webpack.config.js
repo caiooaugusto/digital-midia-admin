@@ -19,7 +19,10 @@ module.exports = {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {
-          // vue-loader options go here
+          // vue-loader options go here`
+          buble: {
+            objectAssign: 'Object.assign',
+          }
         }
       },
       {

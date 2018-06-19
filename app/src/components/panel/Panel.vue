@@ -46,7 +46,7 @@
                         <br>
                         <br>
                         <v-layout row>
-                            <v-flex xs9>
+                            <v-flex xs12>
                                 <v-toolbar
                                     color="white"
                                     dense
@@ -54,19 +54,20 @@
                                     <v-text-field v-model="searchIncident" placeholder="Pesquise pelo titulo, descricao, categoria ou palavras chaves dos incidentes." prepend-icon="search" hide-details single-line></v-text-field>
                                 </v-toolbar>     
                             </v-flex>
-                            <v-spacer></v-spacer>
-                            <v-btn color="primary" @click="showIncidentForm = true">Adicionar novo incidente</v-btn>
                         </v-layout>
                     </div>
-                    <form class="form-user" :class="{ hide: !showIncidentForm, hide: props.item.incident.id }">
+                    <form class="form-user">
                         <v-layout row>
                             <v-flex xs8>
                                 <v-select
                                     v-model="props.item.incident.category"
                                     :items="incidentsCategories"
-                                    label="Categoria"
+                                    :key="props.item.incident.category.id"
+                                    label="Categoria"                                    
+                                    @change="onSelectIncidentCategory($event, props.item)"
                                     single-line
                                     required
+                                    chips
                                 ></v-select>    
                             </v-flex>
                             <v-spacer></v-spacer>                            
@@ -103,6 +104,91 @@
                 </v-card>
             </template>
         </v-data-table>
+
+        <v-dialog fullscreen v-model="showIncidentsSearch">
+            <v-card>
+                <v-card-title>
+                    Resultado
+                </v-card-title>
+                <v-card-text>
+                    <v-data-table
+                        class="users-data-table elevation-4"
+                        :headers="headersIncidents"
+                        :items="incidents"
+                        hide-actions
+                        item-key="id"            
+                    >
+                        <template slot="items" scope="props">                
+                            <tr
+                                @click="props.expanded = !props.expanded"
+                            >
+                                <td>{{ props.item.category.text }}</td>
+                                <td class="text-xs-right">{{ props.item.keyWords }}</td>
+                                <td class="text-xs-right">{{ props.item.title }}</td>
+                                <td class="text-xs-right">{{ props.item.description }}</td>
+                                <td class="text-xs-right">{{ props.item.module }}</td>
+                                <td class="text-xs-right">{{ props.item.solution }}</td>
+                            </tr>
+                        </template>
+                        <template slot="expand" scope="props">
+                            <v-card flat>
+                                <form class="form-user">
+                                    <v-layout row>
+                                        <v-flex xs12>
+                                            <v-select
+                                                disabled
+                                                v-model="props.item.category"
+                                                :items="incidentsCategories"
+                                                :key="props.item.category.id"
+                                                label="Categoria"                                    
+                                                @change="onSelectIncidentCategory($event, props.item)"
+                                                single-line
+                                                required
+                                                chips
+                                            ></v-select>    
+                                        </v-flex>
+                                    </v-layout>
+                                    <v-text-field
+                                        disabled
+                                        v-model="props.item.keyWords"
+                                        label="Palavras chave"                      
+                                        required
+                                    ></v-text-field>
+                                    <v-text-field
+                                        disabled
+                                        v-model="props.item.title"
+                                        label="Titulo"                          
+                                        required
+                                    ></v-text-field>
+                                    <v-text-field
+                                        disabled
+                                        v-model="props.item.description"
+                                        label="Descricao"                      
+                                        required
+                                    ></v-text-field>   
+                                    <v-text-field
+                                        disabled
+                                        v-model="props.item.module"
+                                        label="Modulo"                      
+                                        required
+                                    ></v-text-field>
+                                    <v-text-field
+                                        disabled
+                                        v-model="props.item.solution"
+                                        label="Solução"                          
+                                        required
+                                    ></v-text-field>                               
+                                </form>                                
+                            </v-card>
+                        </template>
+                    </v-data-table>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="primary" @click="createIncidentCategory">Selecionar</v-btn>
+                    <v-btn color="primary" flat @click.stop="showIncidentsSearch=false">Cancelar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <v-dialog v-model="showIncidentCategoryForm" max-width="500px">
             <v-card>
@@ -173,7 +259,7 @@
                 searchIncident: "",  
                 showForm: false, 
                 showIncidentCategoryForm: false, 
-                showIncidentForm: false,              
+                showIncidentsSearch: false,     
                 panelForm: [],                              
                 incidentCategoryForm: [],
                 items: [],                
@@ -182,6 +268,14 @@
                 headers: [
                     { text: 'Nome', value: 'name', align: 'left' },
                     { text: 'Localização', value: 'position' }
+                ],
+                headersIncidents: [                    
+                    { text: 'Categoria', value: 'category.text' },
+                    { text: 'Palavras chave', value: 'keyWords' },                    
+                    { text: 'Titulo', value: 'title', align: 'left' },
+                    { text: 'Descricao', value: 'description', align: 'left' },
+                    { text: 'Modulo', value: 'module', align: 'left' },
+                    { text: 'Solucao', value: 'solution', align: 'left' },
                 ]
             }
         },
@@ -213,8 +307,11 @@
             search (query, queryOld) {
                 if(query.length) {
                     this.searchPanels()
-                }else{
-                    this.items = this.allItems
+                }
+            },
+            searchIncident (query, queryOld) {
+                if(query.length) {
+                    this.searchIncidents()
                 }
             }
         },
@@ -222,6 +319,8 @@
             updateLocalStorage(){
                 localStorage.setItem('items', JSON.stringify(this.items))
                 localStorage.setItem('incidents', JSON.stringify(this.incidents))
+                console.log("this.incidents")
+                console.log(this.incidents)
                 localStorage.setItem('incidentsCategories', JSON.stringify(this.incidentsCategories))
             },
             getLocalStorage(){
@@ -229,18 +328,25 @@
                 this.incidents = JSON.parse(localStorage.getItem('incidents')) ? JSON.parse(localStorage.getItem('incidents')) : []
                 this.incidentsCategories = JSON.parse(localStorage.getItem('incidentsCategories')) ? JSON.parse(localStorage.getItem('incidentsCategories')) : []                    
             },
-
+            getLocalStorageIncidents(){                
+                this.incidents = JSON.parse(localStorage.getItem('incidents')) ? JSON.parse(localStorage.getItem('incidents')) : []
+            },
             searchPanels(){
                 this.items = this.items.filter(panel => panel.name.toLowerCase().includes(this.search.toLowerCase()))
             },
-
+            searchIncidents(){
+                this.incidents = this.incidents.filter(incident => incident.title.toLowerCase().includes(this.searchIncident.toLowerCase()))
+                console.log('this.incidents')
+                console.log(this.incidents)
+                this.showIncidentsSearch = true
+            },
             createPanel () {
                 this.items.push({
-                    id: this.items.length ? this.items[this.items.length].id + 1 : 1,
+                    id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
                     name: this.panelForm.name,
                     position: this.panelForm.position,
                     incident: {
-                        id: null,
+                        id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
                         category: "",
                         keyWords: "",
                         title: "",
@@ -254,27 +360,47 @@
                 this.clearPanelForm()
             },
             createIncident (item) {  
-                console.log(item.incident)              
-                this.incidents.push(item.incident)
+                console.log(item.incident) 
+                getLocalStorageIncidents()
+                
+                let incidentAlreadyExist = this.incidents.map(incident => incident.id =! item.incident.id)
+                if(!incidentAlreadyExist){
+                    this.incidents.push(item.incident)
+                }
+
                 this.items = this.items.map(currentItem => {
                     if(currentItem == item.id){
                         currentItem.incident = item.incident
                     }
-                })   
-                console.log('this.items')
-                console.log(this.items)
+                    return currentItem
+                })
                 this.updateLocalStorage()
             },
             createIncidentCategory() {
                 this.incidentsCategories.push(
                     {
+                        id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
                         text: this.incidentCategoryForm.name
                     }
                 )                
+                this.updateLocalStorage()
                 this.showIncidentCategoryForm = false    
                 this.clearIncidentCategoryForm() 
             },
-
+            onSelectIncidentCategory(e, item){
+                this.items = this.items.map(currentItem => {
+                    if(currentItem == item.id){
+                        currentItem = {
+                            ...currentItem,
+                            category: e
+                        }
+                    }
+                    return currentItem
+                })          
+                console.log(`this.items on onSelectIncidentCategory`)
+                console.log(this.items)
+                this.updateLocalStorage()
+            },
             deletePanel (item) {      
                 this.items = this.items.filter(currentItem => currentItem =! item.id)          
                 this.updateLocalStorage()
@@ -292,10 +418,28 @@
                             solution: ""
                         }
                     }
+                    return currentItem
                 })          
                 this.updateLocalStorage()
             },
             updatePanel (item) {
+                this.updateLocalStorage()
+            },
+            showIncident(item) {
+                this.items = this.items.map(currentItem => {
+                    if(currentItem == item.id){
+                        currentItem.incident = {
+                            id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
+                            category: "",
+                            keyWords: "",
+                            title: "",
+                            description: "",
+                            module: "",
+                            solution: ""
+                        }
+                    }
+                    return currentItem
+                })                   
                 this.updateLocalStorage()
             },
             clearPanelForm () {
@@ -310,6 +454,10 @@
 </script>
 
 <style lang="stylus" scoped>
+    .fullscreen-modal
+        width 90vw
+        height 90vh
+
     .fab-sync
         position fixed
         bottom 75px
