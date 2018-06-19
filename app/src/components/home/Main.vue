@@ -7,12 +7,14 @@
         <main class="home-main">
             <v-container>
                 <vue-progress-bar></vue-progress-bar>
-                <task-list></task-list>
+                <component
+                    :is="selectedComponent"
+                ></component>
             </v-container>
         </main>
         <home-footer
-            :e='e'
-            @switchFooter='e = $event'
+            :selectedComponent='selectedComponent'
+            @switchComponent='selectedComponent = $event'
         ></home-footer>
     </v-app>
 </template>
@@ -20,17 +22,19 @@
 <script>
     import Toolbar from './Toolbar.vue'
     import HomeFooter from './Footer.vue'
-    import TaskList from '../task/TaskList.vue'
+    import Panel from '../panel/Panel.vue'
+    import Incident from '../incident/Incident.vue'
     
     export default {
         components: {
             Toolbar,
             HomeFooter,
-            TaskList
+            Panel, 
+            Incident
         },
         data () {
             return {
-                e: 0
+                selectedComponent: 'Panel'
             }
         }
     }

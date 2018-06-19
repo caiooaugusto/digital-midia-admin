@@ -4,16 +4,16 @@
         :value="true"
         :active.sync="e"
         :class="{
-            'expoville base': e === 0,
-            'expoville lighten-1': e === 1
+            'base': e === 0
         }"
     >
         <v-btn
             dark
             flat
+            @click.native="showPanels(0)"
         >
-            <span>My task list</span>
-            <v-icon>people</v-icon>
+            <span>Painéis</span>
+            <v-icon>aspect_ratio</v-icon>
         </v-btn>
     </v-bottom-nav>
 </template>
@@ -22,11 +22,16 @@
     import Vue from 'vue'
 
     export default {
-        props:{
-            e: Number
-        },
         data () {
             return {
+                e: 0
+            }
+        },
+        methods: {
+            showPanels (e) {
+                this.e = 0
+                this.selectedComponent = 'Panel'
+                this.$emit('switchComponent', this.selectedComponent)
             }
         }
     }

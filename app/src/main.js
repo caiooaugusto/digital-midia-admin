@@ -1,27 +1,12 @@
 import Vue from 'vue'
-import VueCordova from 'vue-cordova'
 import VueRouter from 'vue-router'
 import VueResource from 'vue-resource'
 import Vuetify from 'vuetify'
 import VueProgressBar from 'vue-progressbar'
 import VueResourceProgressBarInterceptor  from 'vue-resource-progressbar-interceptor'
-import messages from 'vee-validate/dist/locale/pt_BR';
-import VeeValidate, { Validator } from 'vee-validate';
 
 import App from './App.vue'
 import { routes } from './routes'
-
-//cordova config
-Vue.use(VueCordova, {
-  optionTestKey: 'optionTestValue'
-})
-// add cordova.js only if serving the app through file://
-if (window.location.protocol === 'file:' || window.location.port === '3000') {
-    var cordovaScript = document.createElement('script')
-    cordovaScript.setAttribute('type', 'text/javascript')
-    cordovaScript.setAttribute('src', 'cordova.js')
-    document.body.appendChild(cordovaScript)
-}
 
 //vue router config
 Vue.use(VueRouter);
@@ -69,51 +54,11 @@ Vue.use(VueResourceProgressBarInterceptor, progressbarInterceptorOptions);
 //vuetify config
 Vue.use(Vuetify);
 
-//vue form validation
-// Merge the locales.
-Validator.addLocale(messages);
-const config = {
-    errorBagName: 'errors', // change if property conflicts
-    fieldsBagName: 'fields',
-    delay: 0,
-    locale: 'pt-BR',
-    dictionary: null,
-    strict: true,
-    classes: false,
-    classNames: {
-        touched: 'touched', // the control has been blurred
-        untouched: 'untouched', // the control hasn't been blurred
-        valid: 'valid', // model is valid
-        invalid: 'invalid', // model is invalid
-        pristine: 'pristine', // control has not been interacted with
-        dirty: 'dirty' // control has been interacted with
-    },
-    events: 'input|blur',
-    inject: true,
-    validity: false,
-    aria: true
-};
-
-
-Vue.use(VeeValidate, config);
-
 //vue router
 const router = new VueRouter({
     mode: 'hash', //history mode cause a bug in production *see that in future
     routes
 });
-
-(function() {
-    Vue.cordova.on('deviceready', () => {
-        function onBackKeyDown() {
-            // Handle the back button
-            event.preventDefault()
-            event.stopPropagation()
-            return false
-        }
-        document.addEventListener("backbutton", onBackKeyDown, false)
-    })
-}());
 
 new Vue({
     el: '#app',

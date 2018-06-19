@@ -1,15 +1,12 @@
 <template>
     <v-toolbar light class="toolbar-tasklist">
-        <div class="toolbar-title"> Task list Laravel, VueJS2, VuetifyJS including Cordova</div>
-        <!--<logo class="logo-toolbar"></logo>-->
+        <div class="toolbar-title">Mídia Digital Outdoor - Admin</div>
     </v-toolbar>
 </template>
 
 <script>
-    import Logo from '../shared/Logo.vue'
     export default {
         components: {
-            Logo: Logo
         },
         data () {
             return {
