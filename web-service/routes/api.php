@@ -19,11 +19,17 @@ Route::group(array('prefix' => ''), function()
         return response()->json(['message' => 'Task list API', 'status' => 'Connected']);
     });
 
-    Route::post('task/create', 'TaskController@create')->name('task.create');
-    Route::get('task/get', 'TaskController@get')->name('task.get');
-    Route::get('task/getByRfid', 'TaskController@getbyrfid')->name('task.getbyrfid');
-    Route::put('task/update', 'TaskController@update')->name('task.update');
-    Route::post('task/delete', 'TaskController@delete')->name('task.delete');
+    Route::post('incident/create', 'TaskController@create')->name('task.create');
+    Route::get('incident/get', 'TaskController@get')->name('task.get');
+    Route::get('incident/getByRfid', 'TaskController@getbyrfid')->name('task.getbyrfid');
+    Route::put('incident/update', 'TaskController@update')->name('task.update');
+    Route::post('incident/delete', 'TaskController@delete')->name('task.delete');
+
+    Route::post('panel/create', 'TaskController@create')->name('task.create');
+    Route::get('panel/get', 'TaskController@get')->name('task.get');
+    Route::get('panel/getByRfid', 'TaskController@getbyrfid')->name('task.getbyrfid');
+    Route::put('panel/update', 'TaskController@update')->name('task.update');
+    Route::post('panel/delete', 'TaskController@delete')->name('task.delete');
 
     Route::get('user/syncUsers', 'TaskController@syncUsers')->name('task.syncusers');
 });
