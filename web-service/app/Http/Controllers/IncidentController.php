@@ -5,7 +5,7 @@ namespace TaskList\Http\Controllers;
 use TaskList\Task;
 use Illuminate\Http\Request;
 
-class TaskController extends Controller
+class IncidentController extends Controller
 {
     public function create(Request $request)
     {
