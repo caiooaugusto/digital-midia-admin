@@ -36,13 +36,11 @@
                             label="Localização"                      
                             required
                         ></v-text-field>                        
-                        <v-btn color="primary" @click="updatePanel(props.item)">Atualizar</v-btn>
-                        <v-btn color="red" style='color: white' @click="deletePanel(props.item)">Apagar</v-btn>
                     </form>                    
                 </v-card>
                 <v-card flat>
                     <div class="form-user">
-                        <div class="title">Incidente</div>
+                        <div class="title">Incidentes</div>
                         <br>
                         <br>
                         <v-layout row>
@@ -51,56 +49,20 @@
                                     color="white"
                                     dense
                                 >
-                                    <v-text-field v-model="searchIncident" placeholder="Pesquise pelo titulo, descricao, categoria ou palavras chaves dos incidentes." prepend-icon="search" hide-details single-line></v-text-field>
+                                    <v-text-field v-model="searchIncident" @change="selectedPanel = props.item" placeholder="Pesquise pelo titulo, descricao, categoria ou palavras chaves dos incidentes." prepend-icon="search" hide-details single-line></v-text-field>
                                 </v-toolbar>     
                             </v-flex>
                         </v-layout>
+                    </div>                
+                </v-card>
+                <v-card>         
+                    <div class="form-user">
+                        <div v-for="(incident, index) in props.item.incidents" :key="incident.title">
+                            {{index+1}}. {{incident.title}} - {{incident.description}} - {{incident.category}} - {{incident.keyWords}} - {{incident.module}} - {{incident.solution}}
+                        </div>
+                        <v-btn color="primary" @click="updatePanel(props.item)">Salvar</v-btn>
+                        <v-btn color="red" style='color: white' @click="deletePanel(props.item)">Apagar</v-btn>
                     </div>
-                    <form class="form-user">
-                        <v-layout row>
-                            <v-flex xs8>
-                                <v-select
-                                    v-model="props.item.incident.category"
-                                    :items="incidentsCategories"
-                                    :key="props.item.incident.category.id"
-                                    label="Categoria"                                    
-                                    @change="onSelectIncidentCategory($event, props.item)"
-                                    single-line
-                                    required
-                                    chips
-                                ></v-select>    
-                            </v-flex>
-                            <v-spacer></v-spacer>                            
-                            <v-btn color="primary" @click="showIncidentCategoryForm = true">Adicionar nova categoria de incidente</v-btn>
-                        </v-layout>
-                        <v-text-field
-                            v-model="props.item.incident.keyWords"
-                            label="Palavras chave"                      
-                            required
-                        ></v-text-field>
-                        <v-text-field
-                            v-model="props.item.incident.title"
-                            label="Titulo"                          
-                            required
-                        ></v-text-field>
-                        <v-text-field
-                            v-model="props.item.incident.description"
-                            label="Descricao"                      
-                            required
-                        ></v-text-field>   
-                        <v-text-field
-                            v-model="props.item.incident.module"
-                            label="Modulo"                      
-                            required
-                        ></v-text-field>
-                        <v-text-field
-                            v-model="props.item.incident.solution"
-                            label="Solução"                          
-                            required
-                        ></v-text-field>
-                        <v-btn color="primary" @click="createIncident(props.item)">Salvar</v-btn>
-                        <v-btn color="red" style='color: white' @click="deleteIncident(props.item)">Remover</v-btn>                                 
-                    </form>                    
                 </v-card>
             </template>
         </v-data-table>
@@ -108,28 +70,34 @@
         <v-dialog fullscreen v-model="showIncidentsSearch">
             <v-card>
                 <v-card-title>
-                    Resultado
+                    Resultado da Pesquisa
                 </v-card-title>
                 <v-card-text>
+                    <v-toolbar
+                        color="white"
+                        dense
+                    >
+                        <v-text-field v-model="searchIncident" placeholder="Pesquise pelo titulo, descricao, categoria ou palavras chaves dos incidentes." prepend-icon="search" hide-details single-line></v-text-field>
+                    </v-toolbar>  
                     <v-data-table
                         class="users-data-table elevation-4"
                         :headers="headersIncidents"
-                        :items="incidents"
+                        :items="searchIncidentResult"
                         hide-actions
-                        item-key="id"            
+                        item-key="title"            
                     >
                         <template slot="items" scope="props">                
                             <tr
                                 @click="props.expanded = !props.expanded"
                             >
-                                <td>{{ props.item.category.text }}</td>
+                                <td>{{ props.item.category }}</td>
                                 <td class="text-xs-right">{{ props.item.keyWords }}</td>
                                 <td class="text-xs-right">{{ props.item.title }}</td>
                                 <td class="text-xs-right">{{ props.item.description }}</td>
                                 <td class="text-xs-right">{{ props.item.module }}</td>
                                 <td class="text-xs-right">{{ props.item.solution }}</td>
                             </tr>
-                        </template>
+                        </template>                        
                         <template slot="expand" scope="props">
                             <v-card flat>
                                 <form class="form-user">
@@ -139,7 +107,7 @@
                                                 disabled
                                                 v-model="props.item.category"
                                                 :items="incidentsCategories"
-                                                :key="props.item.category.id"
+                                                :key="props.item.category"
                                                 label="Categoria"                                    
                                                 @change="onSelectIncidentCategory($event, props.item)"
                                                 single-line
@@ -177,39 +145,17 @@
                                         v-model="props.item.solution"
                                         label="Solução"                          
                                         required
-                                    ></v-text-field>                               
+                                    ></v-text-field>                                        
+                                    <v-btn color="primary" @click="selectIncident(props.item)">Selecionar</v-btn>    
                                 </form>                                
                             </v-card>
                         </template>
                     </v-data-table>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="primary" @click="createIncidentCategory">Selecionar</v-btn>
-                    <v-btn color="primary" flat @click.stop="showIncidentsSearch=false">Cancelar</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="showIncidentCategoryForm" max-width="500px">
-            <v-card>
-                <v-card-title>
-                    Novo Categoria de Incidente
-                </v-card-title>
-                <v-card-text>
-                    <form class="form-user">
-                        <v-text-field
-                            v-model="incidentCategoryForm.name"
-                            label="Nome"
-                            :counter="100"                           
-                            required
-                        ></v-text-field>
-                    </form>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="primary" @click="createIncidentCategory">Salvar</v-btn>
-                    <v-btn color="warning" @click="clearIncidentCategoryForm">Limpar campos</v-btn>
-                    <v-btn color="primary" flat @click.stop="showIncidentCategoryForm=false">Cancelar</v-btn>
-                </v-card-actions>
+                                                  
+                    <v-card-actions>                        
+                        <v-btn color="primary" flat @click.stop="showIncidentsSearch=false">Cancelar</v-btn>
+                    </v-card-actions> 
+                </v-card-text>     
             </v-card>
         </v-dialog>
 
@@ -255,22 +201,23 @@
     export default {
         data () {
             return {
-                search: "",  
-                searchIncident: "",  
+                search: "",                
+                searchIncident: "",
                 showForm: false, 
-                showIncidentCategoryForm: false, 
                 showIncidentsSearch: false,     
-                panelForm: [],                              
-                incidentCategoryForm: [],
-                items: [],                
+                panelForm: {name: '', position: '', incidents: []},             
+                items: [],
+                panels: [],
                 incidents: [],
+                selectedPanel: null,
+                searchIncidentResult: [],
                 incidentsCategories: [],
                 headers: [
                     { text: 'Nome', value: 'name', align: 'left' },
                     { text: 'Localização', value: 'position' }
                 ],
                 headersIncidents: [                    
-                    { text: 'Categoria', value: 'category.text' },
+                    { text: 'Categoria', value: 'category' },
                     { text: 'Palavras chave', value: 'keyWords' },                    
                     { text: 'Titulo', value: 'title', align: 'left' },
                     { text: 'Descricao', value: 'description', align: 'left' },
@@ -280,113 +227,82 @@
             }
         },
         mounted(){
-            //this.items = [
-            //    {name: 'oi', position: 'Rua tal tal tal tal'},
-            //    {name: 'tchau', position: 'Rua tal tal tal tal'},
-            //]
-            this.panelForm = [{name: '', position: ''}]
-            this.incidentCategoryForm = [{name: ''}]
-
-            this.getLocalStorage()
-
-            //get items
-            //get incidents
-            //get incidentsCategories
-
-            /*this.$http.get('task/get')
-                .then(response => {
-                    return response.json()
-                }, error => {
-                    alert(JSON.stringify(error))
-                }).then(data => {
-                this.allItems = data;
-                this.items = data;
-            })*/
+            this.getLocalStorages()
         },
         watch: {
             search (query, queryOld) {
                 if(query.length) {
                     this.searchPanels()
+                }else{
+                    this.items = this.panels
                 }
             },
             searchIncident (query, queryOld) {
                 if(query.length) {
                     this.searchIncidents()
+                }else{
+                    this.searchIncidentResult = this.incidents
                 }
             }
         },
         methods: {
             updateLocalStorage(){
-                localStorage.setItem('items', JSON.stringify(this.items))
+                localStorage.setItem('panels', JSON.stringify(this.items))
                 localStorage.setItem('incidents', JSON.stringify(this.incidents))
-                console.log("this.incidents")
-                console.log(this.incidents)
                 localStorage.setItem('incidentsCategories', JSON.stringify(this.incidentsCategories))
             },
-            getLocalStorage(){
-                this.items = JSON.parse(localStorage.getItem('items')) ? JSON.parse(localStorage.getItem('items')) : []
+            getLocalStorages(){
+                this.panels = JSON.parse(localStorage.getItem('panels')) ? JSON.parse(localStorage.getItem('panels')) : []
+                this.items = this.panels
                 this.incidents = JSON.parse(localStorage.getItem('incidents')) ? JSON.parse(localStorage.getItem('incidents')) : []
                 this.incidentsCategories = JSON.parse(localStorage.getItem('incidentsCategories')) ? JSON.parse(localStorage.getItem('incidentsCategories')) : []                    
             },
             getLocalStorageIncidents(){                
                 this.incidents = JSON.parse(localStorage.getItem('incidents')) ? JSON.parse(localStorage.getItem('incidents')) : []
             },
+
             searchPanels(){
-                this.items = this.items.filter(panel => panel.name.toLowerCase().includes(this.search.toLowerCase()))
+                this.items = this.panels.filter( (panel) => {
+                    console.log(panel)
+                    console.log(this.search.toLowerCase())
+                    if(panel.name.toLowerCase().includes(this.search.toLowerCase()) || panel.position.toLowerCase().includes(this.search.toLowerCase())) {
+                        return panel
+                    }
+                })         
             },
             searchIncidents(){
-                this.incidents = this.incidents.filter(incident => incident.title.toLowerCase().includes(this.searchIncident.toLowerCase()))
-                console.log('this.incidents')
-                console.log(this.incidents)
+                this.searchIncidentResult = this.incidents.filter( (incident) => {
+                    if(incident.title.toLowerCase().includes(this.searchIncident.toLowerCase()) || incident.description.toLowerCase().includes(this.searchIncident.toLowerCase()) ||
+                    incident.keyWords.toLowerCase().includes(this.searchIncident.toLowerCase()) || incident.category.toLowerCase().includes(this.searchIncident.toLowerCase())) {
+                        return incident
+                    }
+                })
                 this.showIncidentsSearch = true
             },
-            createPanel () {
-                this.items.push({
-                    id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
-                    name: this.panelForm.name,
-                    position: this.panelForm.position,
-                    incident: {
-                        id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
-                        category: "",
-                        keyWords: "",
-                        title: "",
-                        description: "",
-                        module: "",
-                        solution: ""
-                    }
-                })
-                this.updateLocalStorage()
-                this.showForm = false    
-                this.clearPanelForm()
-            },
-            createIncident (item) {  
-                console.log(item.incident) 
-                getLocalStorageIncidents()
-                
-                let incidentAlreadyExist = this.incidents.map(incident => incident.id =! item.incident.id)
-                if(!incidentAlreadyExist){
-                    this.incidents.push(item.incident)
-                }
 
-                this.items = this.items.map(currentItem => {
-                    if(currentItem == item.id){
-                        currentItem.incident = item.incident
+            createPanel () {           
+                this.items.push(this.panelForm)
+                this.updateLocalStorage() 
+                this.showForm = false                             
+                this.clearPanelForm()
+                this.getLocalStorages()
+            },
+
+            selectIncident(item) {                
+                console.log('selected panel')                
+                console.log(this.selectedPanel)
+                console.log('selected incident')
+                console.log(item)
+
+                this.items.map( (panel) => {
+                    if(panel.name === this.selectedPanel.name){
+                        panel.incidents.push(item)
                     }
-                    return currentItem
                 })
                 this.updateLocalStorage()
+                this.showIncidentsSearch = false
             },
-            createIncidentCategory() {
-                this.incidentsCategories.push(
-                    {
-                        id: this.items.length ? this.items[this.items.length-1].id + 1 : 1,
-                        text: this.incidentCategoryForm.name
-                    }
-                )                
-                this.updateLocalStorage()
-                this.showIncidentCategoryForm = false    
-                this.clearIncidentCategoryForm() 
-            },
+
             onSelectIncidentCategory(e, item){
                 this.items = this.items.map(currentItem => {
                     if(currentItem == item.id){
@@ -422,7 +338,7 @@
                 })          
                 this.updateLocalStorage()
             },
-            updatePanel (item) {
+            updatePanel () {
                 this.updateLocalStorage()
             },
             showIncident(item) {
@@ -445,6 +361,7 @@
             clearPanelForm () {
                 this.panelForm.name = ''
                 this.panelForm.position = ''
+                this.panelForm.incidents = []
             },
             clearIncidentCategoryForm () {
                 this.incidentCategoryForm.name = ''

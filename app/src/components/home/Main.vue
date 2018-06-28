@@ -22,17 +22,19 @@
 <script>
     import Toolbar from './Toolbar.vue'
     import HomeFooter from './Footer.vue'
-    import Panel from '../panel/Panel.vue'
+    import Panels from '../panel/Panels.vue'
+    import Incidents from '../panel/Incidents.vue'
     
     export default {
         components: {
             Toolbar,
             HomeFooter,
-            Panel
+            Panels,
+            Incidents
         },
         data () {
             return {
-                selectedComponent: 'Panel'
+                selectedComponent: 'Panels'
             }
         }
     }
